@@ -1,1 +1,46 @@
-# n8n-workflows
+# Automated LinkedIn Content Generation (n8n Workflow)
+ 
+An n8n automation that watches a Google Sheet for new article links, summarizes each article using Google Gemini, turns the summary into a polished LinkedIn post, and publishes it automatically.
+ 
+## How it works
+ 
+```
+Google Sheets Trigger → Summarize Articles (Gemini) → Generate LinkedIn Post (Gemini) → Post to LinkedIn
+```
+ 
+1. **Google Sheets Trigger** — polls a Google Sheet for new/updated rows. Each row is expected to have a `newslinks` column containing an article URL or text.
+2. **Summarize Articles** — an LLM chain (backed by Google Gemini) that reads the article and produces a ~200-word summary covering key insights, actionable advice, tone, and audience implications.
+3. **Generate LinkedIn Post Content** — a second Gemini-powered LLM chain that rewrites the summary as a structured, engaging LinkedIn post with a professional call to action.
+4. **Post to LinkedIn** — publishes the generated content directly to a LinkedIn profile/page via the LinkedIn node.
+## Requirements
+ 
+- A running [n8n](https://n8n.io) instance (self-hosted or cloud)
+- A Google account with:
+  - A Google Sheet containing your article links (column name: `newslinks`)
+  - Google Gemini API access (via Google AI Studio / PaLM API)
+- A LinkedIn account with API access (LinkedIn OAuth2 app configured for posting)
+## Setup
+ 
+1. **Import the workflow**
+   In n8n: `Workflows → Import from File` and select the workflow JSON file.
+   ⚠️ **Important:** this workflow is exported with `"active": true` and polls the Google Sheet **every minute**. After importing, immediately toggle it **Inactive** in n8n until you've connected your own credentials in step 2 — otherwise it will start failing every minute trying to poll a Sheet it can't access.
+2. **Connect your credentials**
+   This file ships with placeholder credential references only — no secrets included. You'll need to create and attach your own credentials in n8n for:
+   - `Google Sheets Trigger` node → Google Sheets OAuth2 credential
+   - `Google Gemini Chat Model` and `Google Gemini Chat Model1` nodes → Google Gemini (PaLM) API credential
+   - `Create a post` node → LinkedIn OAuth2 credential
+3. **Point it at your own Google Sheet**
+   Open the `Google Sheets Trigger` node and select your own spreadsheet + sheet tab. Make sure the sheet has a `newslinks` column.
+4. **Set your LinkedIn profile**
+   Open the `Create a post` node and select your LinkedIn person/organization URN from the credential-linked dropdown (don't hardcode someone else's URN).
+5. **Test before activating**
+   Run the workflow manually on a test row first to confirm the summary and generated post read the way you want, then toggle the workflow back to **Active**.
+## Notes
+ 
+- The LLM prompts (summary style, LinkedIn post tone/structure) can be edited directly in the `Summarize Articles` and `Generate LinkedIn post content` nodes.
+- No API keys, tokens, or credentials are stored in this JSON file — n8n keeps those encrypted separately per-instance. Anyone importing this workflow must connect their own accounts.
+- Consider adding a rate limit or manual approval step before the `Create a post` node if you want to review posts before they go live.
+## License
+ 
+Feel free to use, modify, and share.
+ 
