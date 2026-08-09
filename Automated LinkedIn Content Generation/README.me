@@ -22,8 +22,7 @@ Google Sheets Trigger → Summarize Articles (Gemini) → Generate LinkedIn Post
 ## Setup
  
 1. **Import the workflow**
-   In n8n: `Workflows → Import from File` and select the workflow JSON file.
-   ⚠️ **Important:** this workflow is exported with `"active": true` and polls the Google Sheet **every minute**. After importing, immediately toggle it **Inactive** in n8n until you've connected your own credentials in step 2 — otherwise it will start failing every minute trying to poll a Sheet it can't access.
+   In n8n: `Workflows → Import from File` and select the workflow JSON file. It's exported as inactive (`"active": false`), so nothing runs until you connect credentials and switch it on yourself.
 2. **Connect your credentials**
    This file ships with placeholder credential references only — no secrets included. You'll need to create and attach your own credentials in n8n for:
    - `Google Sheets Trigger` node → Google Sheets OAuth2 credential
@@ -34,7 +33,7 @@ Google Sheets Trigger → Summarize Articles (Gemini) → Generate LinkedIn Post
 4. **Set your LinkedIn profile**
    Open the `Create a post` node and select your LinkedIn person/organization URN from the credential-linked dropdown (don't hardcode someone else's URN).
 5. **Test before activating**
-   Run the workflow manually on a test row first to confirm the summary and generated post read the way you want, then toggle the workflow back to **Active**.
+   Run the workflow manually on a test row first to confirm the summary and generated post read the way you want, then toggle the workflow to **Active**.
 ## Notes
  
 - The LLM prompts (summary style, LinkedIn post tone/structure) can be edited directly in the `Summarize Articles` and `Generate LinkedIn post content` nodes.
@@ -44,4 +43,3 @@ Google Sheets Trigger → Summarize Articles (Gemini) → Generate LinkedIn Post
  
 Feel free to use, modify, and share.
  
-
