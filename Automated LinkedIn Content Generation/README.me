@@ -1,4 +1,4 @@
-# AI Workflow: Learning Journey Showcase (n8n Workflow)
+# Automated LinkedIn Content Generation (n8n Workflow)
 
 An n8n automation that watches a Google Sheet for new article links, summarizes each article using Google Gemini, turns the summary into a polished LinkedIn post, and publishes it automatically.
 
@@ -24,10 +24,12 @@ Google Sheets Trigger → Summarize Articles (Gemini) → Generate LinkedIn Post
 ## Setup
 
 1. **Import the workflow**
-   In n8n: `Workflows → Import from File` and select the workflow JSON file. It's exported as inactive (`"active": false`), so nothing runs until you connect credentials and switch it on yourself.
+   In n8n: `Workflows → Import from File` and select the workflow JSON file.
+
+   ⚠️ **Important:** this workflow is exported with `"active": true` and polls the Google Sheet **every minute**. After importing, immediately toggle it **Inactive** in n8n until you've connected your own credentials in step 2 — otherwise it will start failing every minute trying to poll a Sheet it can't access.
 
 2. **Connect your credentials**
-   This file ships with placeholder credential references only — no secrets included. You'll need to create and attach your own credentials in n8n for:
+   This file ships with placeholder-style credential references only — no secrets included. You'll need to create and attach your own credentials in n8n for:
    - `Google Sheets Trigger` node → Google Sheets OAuth2 credential
    - `Google Gemini Chat Model` and `Google Gemini Chat Model1` nodes → Google Gemini (PaLM) API credential
    - `Create a post` node → LinkedIn OAuth2 credential
@@ -39,7 +41,7 @@ Google Sheets Trigger → Summarize Articles (Gemini) → Generate LinkedIn Post
    Open the `Create a post` node and select your LinkedIn person/organization URN from the credential-linked dropdown (don't hardcode someone else's URN).
 
 5. **Test before activating**
-   Run the workflow manually on a test row first to confirm the summary and generated post read the way you want, then toggle the workflow to **Active**.
+   Run the workflow manually on a test row first to confirm the summary and generated post read the way you want, then toggle the workflow back to **Active**.
 
 ## Notes
 
