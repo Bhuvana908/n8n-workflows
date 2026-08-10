@@ -1,0 +1,275 @@
+{
+  "name": "Automated LinkedIn Job Tracker",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 10
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "213f7763-eeda-401d-aad2-8fe552c6d385",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a professional career advisor and technical recruiter. Analyze the job posting data and extract technical skills from the job description, then generate a personalized cover letter addressing the specific requirements.\n\nExtract Technical Skills: Identify all relevant technical skills required for the position including programming languages, frameworks, tools, and both explicitly mentioned and implicitly required skills.\n\nGenerate Cover Letter: Create a compelling 250-300 word cover letter that addresses the specific company and role, references key responsibilities, shows enthusiasm for mentioned aspects, includes relevant matching skills, and uses professional yet enthusiastic tone.\n\nStructure the cover letter as: Opening (interest in role) → Middle (relevant skills/experience) → Closing (enthusiasm and next steps).\n\nInput data:\nTitle: {{ $json.title }}\nLink: {{ $json.link }}\nPublished Date: {{ $json.pubDate }}\nAbout Company and job description: {{ $json.content }}",
+        "hasOutputParser": true,
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        432,
+        0
+      ],
+      "id": "2b78ed93-990d-485b-996b-f5fe3e65e19e",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "url": "https://fetchrss.com/feed/1uyABO9zI5z81uyAAz3xOCOY.rss",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "4c9304a5-a2f5-485e-a1ef-4bd6234ee55f",
+      "name": "RSS Read"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        432,
+        224
+      ],
+      "id": "fe6dd2ae-815e-46d8-9614-4f8d9966f4a5",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "hK2xX3ke3x8gklym",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"Title\": \"Job Title from RSS Feed\",\n  \"Link\": \"Job posting URL\",\n  \"Published Date\": \"Publication timestamp\",\n  \"About Company and job description\": \"Full job description content\",\n  \"skills\": \"[Array of extracted technical skills]\",\n  \"cover letter\": \"Generated personalized cover letter\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        576,
+        224
+      ],
+      "id": "0a13f5de-4136-4373-b3a4-a520485982d7",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1Sq6oTj_EDZulTfIAoluhXUB16IngB3D7tHW9le7e4cM",
+          "mode": "list",
+          "cachedResultName": "Automated LinkedIn Job Tracker",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Sq6oTj_EDZulTfIAoluhXUB16IngB3D7tHW9le7e4cM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Sq6oTj_EDZulTfIAoluhXUB16IngB3D7tHW9le7e4cM/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Title": "={{ $json.output.Title }}",
+            "Link": "={{ $json.output.Link }}",
+            "Published Date": "={{ $json.output['Published Date'] }}",
+            "About Company": "={{ $json.output['About Company and job description'] }}",
+            "skills": "={{ $json.output.skills }}",
+            "Cover letter": "={{ $json.output['cover letter'] }}"
+          },
+          "matchingColumns": [
+            "Title"
+          ],
+          "schema": [
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Link",
+              "displayName": "Link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Published Date",
+              "displayName": "Published Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "About Company",
+              "displayName": "About Company",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "job description",
+              "displayName": "job description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "skills",
+              "displayName": "skills",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Cover letter",
+              "displayName": "Cover letter",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        752,
+        0
+      ],
+      "id": "96d1ad3f-b010-4844-b12f-5e57dcb37131",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "3VPZcH4UAVbrYOEd",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "RSS Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "44fa5ce9-7c03-40a2-9657-30c348015b85",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "a36a665ec934e1b8df5ef4f4b392559ef0ec5f89a1e0150c4b6d63c90a5c8bfd"
+  },
+  "nodeGroups": [],
+  "id": "T2KFTP1irpdgs61N",
+  "tags": []
+}
