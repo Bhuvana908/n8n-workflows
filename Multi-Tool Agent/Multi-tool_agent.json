@@ -1,0 +1,279 @@
+{
+  "name": "Multi-tool agent",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "id": "c0254833-8297-4fbc-bf78-2c95f928d25c",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "87c986b8-b1ad-4e3a-86a4-6c650fbd5868",
+      "credentials": {
+        "telegramApi": {
+          "id": "INQm6X2seRBmjBpG",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}",
+        "options": {
+          "systemMessage": "=# Role\nYou an intelligent AI assistant that helps users via Telegram.\nYou are talking to {{ $json.message.from.first_name }}{{ $json.message.from.last_name }}\n\n# Behavior\nYou should:\n- Understand the user's intent clearly.\n- Choose the correct tool from the available ones ONLY when needed.\n- Otherwise, answer directly.\n\n# Response Formatting (IMPORTANT)\nYour reply is sent to Telegram using HTML parse mode. Format your responses using ONLY Telegram-supported HTML tags:\n- <b>bold</b>, <i>italic</i>, <u>underline</u>, <s>strikethrough</s>\n- <code>inline code</code> and <pre>code block</pre>\n- <a href=\"https://example.com\">links</a>\nRules:\n- Do NOT use Markdown syntax such as **, __, ##, ###, or \"* \" bullet markers. Telegram will reject these.\n- For headings, use <b>bold text</b> on its own line.\n- For bullet lists, start each line with a \"- \" or \"•\" character followed by the item text (do not use \"* \").\n- Escape any literal <, >, and & characters as &lt;, &gt;, and &amp; when they are part of normal text.\n\n# Available Tools & When to Use Them:\n\n## 1. Google Gemini Chat Model\nUse for:\n- Natural conversations\n- Creative writing\n- Open-ended questions\n- Explaining concepts\n- General text generation\n\n## 2. SerpAPI\nUse for:\n- Real-time or factual information from the web\n- News, current events, live sports, current prices\n- Anything requiring recent or external data\n\nWhen using the SerpAPI tool, always structure the call like:\nUse tool SerpAPI with input:\n{\n  \"q\": \"search your query here\"\n}\n\n## 3. Calculator\nUse for:\n- Arithmetic\n- Percentages\n- Unit conversions\n- Date or time differences\n\nOnly use if the question involves numbers or calculations. Examples:\n- \"What is 40% of 500?\"\n- \"Convert 20 km to miles\"\n\n\n# 4. Wikipedia\nUse for:\n- When searching for a person or company\n\n# 5. Google Calender\nUse for:\n- When creating a calender event \n- Deleting or modifying calender events"
+        }
+      },
+      "id": "b18ec17e-68ce-4a22-85b9-1f24c0c89ec6",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        288,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "ff080cfa-a42c-4593-9893-d6ee4b673c30",
+      "name": "Google Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        224,
+        224
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": "hK2xX3ke3x8gklym",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://www.searchapi.io/api/v1/search?api_key=YOUR_SEARCHAPI_IO_KEY_HERE&engine=google",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', ``, 'string') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "39dc67b2-c8e7-4866-bb26-6e85aced3a4f",
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        608,
+        432
+      ]
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "16c33a4b06ec52380b2f95f9178a9fd436cce52475ac37de9a5ada071bf69d72@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Multi-tool-agent"
+        },
+        "start": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', ``, 'string') }}",
+        "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', ``, 'string') }}",
+        "additionalFields": {}
+      },
+      "id": "5148ebfe-0649-4bf1-abdc-7505c63f252a",
+      "name": "Create an event in Google Calendar",
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        480,
+        224
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "FFfPMTNi1KWVArIU",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "7b506b2c-2a37-489b-8063-9fbc862da67e",
+      "name": "Send a text message",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        688,
+        0
+      ],
+      "webhookId": "ca2a0058-8e13-47a1-8aaa-915c18f256e9",
+      "credentials": {
+        "telegramApi": {
+          "id": "INQm6X2seRBmjBpG",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        624,
+        240
+      ],
+      "id": "03ef1512-3550-409f-bd8f-81b0e455dfa0",
+      "name": "Calculator"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolWikipedia",
+      "typeVersion": 1,
+      "position": [
+        752,
+        240
+      ],
+      "id": "6a82cc1d-6006-442a-8b03-1633c6c98eef",
+      "name": "Wikipedia"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.message.from.id }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        352,
+        256
+      ],
+      "id": "5c82cb51-a59a-489c-b46c-fa6f83236f68",
+      "name": "Simple Memory"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an event in Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wikipedia": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "7e24b830-3dd2-4a32-b5ac-7f756027a460",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "a36a665ec934e1b8df5ef4f4b392559ef0ec5f89a1e0150c4b6d63c90a5c8bfd"
+  },
+  "nodeGroups": [],
+  "id": "h3YMVhTL05Thj8gS",
+  "tags": []
+}
